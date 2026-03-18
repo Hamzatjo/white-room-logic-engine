@@ -5,6 +5,7 @@ Amsterdam University of Applied Sciences (HvA), Software Engineering
 Independent Research
 
 *Correspondence: hamza.zaraoui@hva.nl*
+*Code and data: [github.com/Hamzatjo/white-room-logic-engine](https://github.com/Hamzatjo/white-room-logic-engine)*
 
 ---
 
@@ -32,9 +33,9 @@ We introduce the **White-Room Logic Engine**, named after the design principle t
 
 This work makes the following contributions:
 
-1. **Synthetic dataset generation pipeline.** We describe a scalable method for generating diverse, structurally varied logic puzzles using a large teacher model (Gemini 3 Flash), producing 3,497 puzzles across five logic categories with controlled complexity, distractor rules, and unsolvable instances.
+1. **Synthetic dataset generation pipeline.** We describe a scalable method for generating diverse, structurally varied logic puzzles using a large teacher model (Gemini 3 Flash), producing 3,179 puzzles across five logic categories with controlled complexity, distractor rules, and unsolvable instances.
 
-2. **Low-resource fine-tuning results.** We demonstrate that LoRA fine-tuning of a 4-bit quantized 0.8B parameter model on consumer hardware (Apple M4, 16 GB RAM) yields meaningful reasoning improvements, transforming a non-functional base model into a structured reasoning engine.
+2. **Low-resource fine-tuning results.** We demonstrate that LoRA fine-tuning of a 4-bit quantized 0.8B parameter model on consumer hardware (Apple Silicon (M4), 16 GB RAM) yields meaningful reasoning improvements, transforming a non-functional base model into a structured reasoning engine.
 
 3. **Multi-dimensional evaluation framework.** We evaluate across seven distinct test dimensions, including a novel rule-order independence test that provides evidence for genuine logical reasoning rather than superficial pattern matching.
 
@@ -88,7 +89,7 @@ Puzzles were generated using **Gemini 3 Flash** through an automated pipeline wi
 
 ### 3.3 Dataset Composition
 
-The final dataset comprises 3,497 validated puzzles distributed across five logic categories:
+The final dataset comprises 3,179 validated puzzles (after deduplication) distributed across five logic categories:
 
 | Category | Count | Description |
 |---|---|---|
@@ -98,16 +99,16 @@ The final dataset comprises 3,497 validated puzzles distributed across five logi
 | Set Theory | 542 | Membership, subset, and exclusion reasoning |
 | Elimination Grid | 356 | Process of elimination over constrained assignments |
 
-**Complexity distribution:**
-- 3-step puzzles: 1,193 (42%)
-- 4-step puzzles: 1,127 (39%)
-- 5-step puzzles: 541 (19%)
+**Complexity distribution (across entire dataset):**
+- 3-step puzzles: 1,317 (41%)
+- 4-step puzzles: 1,265 (40%)
+- 5-step puzzles: 597 (19%)
 
 **Solvability:**
-- Solvable puzzles: 2,244 (78%)
-- Unsolvable puzzles: 617 (22%) — expected answer: "Cannot be determined"
+- Solvable puzzles: ~78%
+- Unsolvable puzzles: ~22% — expected answer: "Cannot be determined"
 
-The dataset was split into training (3,179 examples, 91%), validation (included within the MLX split), and test (318 examples, 9%) sets.
+The dataset was split into training (2,861 examples, 90%) and test (318 examples, 10%) sets, with a validation subset included within the training split for periodic loss evaluation during training.
 
 ### 3.4 Data Format
 
@@ -155,7 +156,7 @@ Training was performed using the **MLX** framework (Apple, 2024), which provides
 | Batch size | 1 |
 | Total iterations | 1,000 |
 | Peak memory usage | 11.2 GB |
-| Hardware | Apple Mac Mini M4, 16 GB RAM |
+| Hardware | Apple Mac Mini, Apple Silicon (M4), 16 GB RAM |
 | Training time | ~4 hours |
 
 ### 4.3 Training Dynamics
@@ -255,7 +256,7 @@ The accuracy degradation follows a smooth, approximately linear curve: approxima
 
 Qualitative analysis of 5-hop responses reveals an interesting failure mode: the model often identifies the correct initial chain direction but, unable to maintain the full 5-step sequence, fabricates intermediate "shortcut" rules to arrive at the final answer. This suggests that the reasoning mechanism, while real, has a limited effective depth of approximately 3–4 steps for this model size.
 
-For context, the original ProntoQA paper reports GPT-3.5 (175B parameters) at 80–95% accuracy depending on chain length. Our model is **219× smaller** and operates under 4-bit quantization, yet achieves 60% overall — a result that, while not competitive with frontier models, demonstrates meaningful reasoning capability for its parameter class.
+For context, the original ProntoQA paper reports GPT-3.5 (175B parameters) at 80–95% accuracy depending on chain length. Our model is **over 200× smaller** and operates under 4-bit quantization, yet achieves 60% overall — a result that, while not competitive with frontier models, demonstrates meaningful reasoning capability for its parameter class.
 
 ### 5.6 Catastrophic Forgetting Analysis
 
@@ -449,6 +450,8 @@ Step 5: Every brown wumpus is hot. Since Wren is a jompus
 True.
 </answer>
 ```
+
+*Note: The model's output begins at "Step 3" rather than "Step 1." This erratic step numbering is observed occasionally when the model is under high cognitive load from longer chains, and suggests the model may be internally discarding earlier reasoning attempts before committing to output.*
 
 The model correctly identifies the starting point (Wren is a vumpus) and the correct conclusion (Wren is hot), but fabricates an intermediate rule ("every brown wumpus is hot") that does not exist in the puzzle. This "reasoning shortcut" pattern is the dominant failure mode at higher hop counts.
 
