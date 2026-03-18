@@ -1,0 +1,29 @@
+# Virtual environment
+mlx_env/
+
+# HuggingFace cache (large, downloadable)
+hf_cache/
+
+# Fused model (large, reproducible from adapters + base model)
+fused_model/
+
+# Intermediate adapter checkpoints (keep only final)
+adapters/0000*_adapters.safetensors
+
+# Intermediate/working files
+generation_queue.jsonl
+dataset_500_locked.jsonl
+reasoning-train.jsonl
+reasoning-train-gemini.jsonl
+eval_results.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+# Logs
+*.log
+mlx_training.log
+mlx_training_resume.log
